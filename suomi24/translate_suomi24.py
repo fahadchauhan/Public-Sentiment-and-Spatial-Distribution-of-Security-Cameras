@@ -1,44 +1,82 @@
+import torch
 import pandas as pd
-from googletrans import Translator
+from transformers import MarianMTModel, MarianTokenizer
+from tqdm import tqdm
 
-def translate_text(text, src_lang='fi', dest_lang='en'):
-    translator = Translator()
-    try:
-        translation = translator.translate(text, src=src_lang, dest=dest_lang)
-        return translation.text
-    except Exception as e:
-        print(f"Error during translation: {e} on text: {text}")
-        return text
+# Setup device for torch
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 
-def process_translate_chunk(chunk, columns):
-    # Concatenate the specified columns with a unique delimiter
-    chunk['combined'] = chunk[columns].apply(lambda x: ' ||| '.join(x.map(str)), axis=1)
-    # Translate the concatenated text
-    chunk['combined'] = chunk['combined'].apply(translate_text)
-    # Split the translated text back into the original columns
-    new_columns = chunk['combined'].str.split(' ||| ', expand=True)
-    for i, column in enumerate(columns):
-        chunk[column] = new_columns[i]
-    return chunk.drop(columns=['combined'])
+# Load model and tokenizer
+model_name = 'Helsinki-NLP/opus-mt-fi-en'
+tokenizer = MarianTokenizer.from_pretrained(model_name)
+model = MarianMTModel.from_pretrained(model_name).to(device)
 
-def translate_dataframe_in_chunks(df, columns, chunk_size=200000):
-    output_file = 'suomi24/Data/translated/s24_2001.csv'
-    first_chunk = True
-    for start in range(0, df.shape[0], chunk_size):
-        chunk = df.iloc[start:start + chunk_size]
-        translated_chunk = process_translate_chunk(chunk, columns)
-        # Write each chunk to CSV, header only in the first chunk
-        translated_chunk.to_csv(output_file, mode='a', header=first_chunk, index=False)
-        first_chunk = False
-        print(f"Processed and saved chunk starting at row {start}")
+# Translation function
+def translate(text, tokenizer, model, device):
+    text = str(text)  # Ensure the input is always a string
+    with torch.no_grad():
+        inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512).to(device)
+        outputs = model.generate(**inputs)
+        translated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return translated_text
 
-    print("Translation completed and all data saved to 'translated_data.csv'")
+# Function to write DataFrame chunk to CSV
+def write_chunk_to_csv(df_chunk, file_path, mode='a', header="False"):
+    
+    df_chunk.to_csv(file_path, mode=mode, header=header, index=False)
 
-# Load your data
+# Read the CSV file into a DataFrame
 df = pd.read_csv('suomi24/Data/filtered/s24_2001.csv')
+output_file = "suomi24/Data/translated/s24_2001.csv"
+chunk_size = 50
 
-# Specify columns to translate
-columns_to_translate = ['title', 'topic_name_top', 'thread_text']
+# Initialize dictionaries to store translations
+translated_titles = {}
+translated_topic_names_top = {}
+translated_topic_names_leaf = {}
 
-# Translate the DataFrame in chunks
-translate_dataframe_in_chunks(df, columns_to_translate)
+# Initialize a list to accumulate processed rows
+processed_rows = []
+first_write = True
+# Process each row, translating as needed
+for index, row in tqdm(df.iterrows()):
+    thread_id = row['thread_id']
+    
+    # Check and translate the unique fields
+    if thread_id not in translated_titles:
+
+        # Every 50,000 rows, write to CSV and clear the list
+        if len(processed_rows) > chunk_size:
+            if first_write:
+                write_header = True
+                write_mode = 'w'
+                first_write=False
+            else:
+                write_header = False
+                write_mode = 'a'
+            write_chunk_to_csv(pd.DataFrame(processed_rows), output_file, mode=write_mode, header=write_header)
+            processed_rows = []
+
+        translated_titles[thread_id] = translate(row['title'], tokenizer, model, device)
+        translated_topic_names_top[thread_id] = translate(row['topic_name_top'], tokenizer, model, device)
+        translated_topic_names_leaf[thread_id] = translate(row['topic_name_leaf'], tokenizer, model, device)
+    
+    # Assign the translations for unique fields
+    row['title'] = translated_titles[thread_id]
+    row['topic_name_top'] = translated_topic_names_top[thread_id]
+    row['topic_name_leaf'] = translated_topic_names_leaf[thread_id]
+    
+    # Translate the thread_text field
+    row['thread_text'] = translate(row['thread_text'], tokenizer, model, device)
+    
+    # Add the processed row to the list
+    processed_rows.append(row)
+    
+    
+
+# Write any remaining rows to CSV
+if processed_rows:
+    write_chunk_to_csv(pd.DataFrame(processed_rows), output_file, mode='a')
+
+print("Translation complete! The translated CSV is saved as {output_file}.")
