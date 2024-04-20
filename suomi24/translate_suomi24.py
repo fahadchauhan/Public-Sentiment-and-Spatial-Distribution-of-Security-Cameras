@@ -29,7 +29,7 @@ def write_chunk_to_csv(df_chunk, file_path, mode='a', header="False"):
 # Read the CSV file into a DataFrame
 df = pd.read_csv('suomi24/Data/filtered/s24_2001.csv')
 output_file = "suomi24/Data/translated/s24_2001.csv"
-chunk_size = 50
+chunk_size = 5000
 
 # Initialize dictionaries to store translations
 translated_titles = {}
