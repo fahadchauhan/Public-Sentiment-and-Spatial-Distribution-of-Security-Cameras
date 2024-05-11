@@ -41,27 +41,27 @@ translated_topic_names_leaf = {}
 # Initialize a list to accumulate processed rows
 processed_rows = []
 first_write = True
-# bet_check = False
+bet_check = False
 # Process each row, translating as needed
 for index, row in tqdm(df.iterrows()):
     thread_id = row['thread_id']
     
-    # if thread_id == 850812:
-    #     bet_check = True
-    # if not bet_check:
-    #     continue
+    if thread_id == 1464141:
+        bet_check = True
+    if not bet_check:
+        continue
     # Check and translate the unique fields
     if thread_id not in translated_titles:
 
         # Every 50,000 rows, write to CSV and clear the list
         if len(processed_rows) > chunk_size:
-            if first_write:
-                write_header = True
-                write_mode = 'w'
-                first_write=False
-            else:
-                write_header = False
-                write_mode = 'a'
+            # if first_write:
+            #     write_header = True
+            #     write_mode = 'w'
+            #     first_write=False
+            # else:
+            write_header = False
+            write_mode = 'a'
             write_chunk_to_csv(pd.DataFrame(processed_rows), output_file, mode=write_mode, header=write_header)
             processed_rows = []
 
