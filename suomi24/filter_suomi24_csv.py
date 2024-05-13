@@ -3,39 +3,51 @@ import re
 from tqdm import tqdm
 
 chunk_size = 50000  # Number of rows per chunk
-filenames = ["suomi24/Data/2001-2020/s24_2008.csv", "suomi24/Data/2001-2020/s24_2009.csv", "suomi24/Data/2001-2020/s24_2010.csv", "suomi24/Data/2001-2020/s24_2011.csv", "suomi24/Data/2001-2020/s24_2012.csv", "suomi24/Data/2001-2020/s24_2013.csv", "suomi24/Data/2001-2020/s24_2014.csv", "suomi24/Data/2001-2020/s24_2015.csv", "suomi24/Data/2001-2020/s24_2016.csv", "suomi24/Data/2001-2020/s24_2017.csv", "suomi24/Data/2001-2020/s24_2018.csv", "suomi24/Data/2001-2020/s24_2019.csv", "suomi24/Data/2001-2020/s24_2020.csv"]
-output_files = ["suomi24/Data/filtered/s24_2008.csv", "suomi24/Data/filtered/s24_2009.csv", "suomi24/Data/filtered/s24_2010.csv", "suomi24/Data/filtered/s24_2011.csv", "suomi24/Data/filtered/s24_2012.csv", "suomi24/Data/filtered/s24_2013.csv", "suomi24/Data/filtered/s24_2014.csv", "suomi24/Data/filtered/s24_2015.csv", "suomi24/Data/filtered/s24_2016.csv", "suomi24/Data/filtered/s24_2017.csv", "suomi24/Data/filtered/s24_2018.csv", "suomi24/Data/filtered/s24_2019.csv", "suomi24/Data/filtered/s24_2020.csv"]
+# filenames = ["suomi24/Data/2001-2020/s24_2008.csv", "suomi24/Data/2001-2020/s24_2009.csv", "suomi24/Data/2001-2020/s24_2010.csv", "suomi24/Data/2001-2020/s24_2011.csv", "suomi24/Data/2001-2020/s24_2012.csv", "suomi24/Data/2001-2020/s24_2013.csv", "suomi24/Data/2001-2020/s24_2014.csv", "suomi24/Data/2001-2020/s24_2015.csv", "suomi24/Data/2001-2020/s24_2016.csv", "suomi24/Data/2001-2020/s24_2017.csv", "suomi24/Data/2001-2020/s24_2018.csv", "suomi24/Data/2001-2020/s24_2019.csv", "suomi24/Data/2001-2020/s24_2020.csv"]
+# output_files = ["suomi24/Data/filtered/s24_2008.csv", "suomi24/Data/filtered/s24_2009.csv", "suomi24/Data/filtered/s24_2010.csv", "suomi24/Data/filtered/s24_2011.csv", "suomi24/Data/filtered/s24_2012.csv", "suomi24/Data/filtered/s24_2013.csv", "suomi24/Data/filtered/s24_2014.csv", "suomi24/Data/filtered/s24_2015.csv", "suomi24/Data/filtered/s24_2016.csv", "suomi24/Data/filtered/s24_2017.csv", "suomi24/Data/filtered/s24_2018.csv", "suomi24/Data/filtered/s24_2019.csv", "suomi24/Data/filtered/s24_2020.csv"]
+
+# filenames = ["suomi24/Data/filtered/s24_2001.csv", "suomi24/Data/filtered/s24_2002.csv", "suomi24/Data/filtered/s24_2003.csv", "suomi24/Data/filtered/s24_2004.csv", "suomi24/Data/filtered/s24_2005.csv", "suomi24/Data/filtered/s24_2007.csv", "suomi24/Data/filtered/s24_2008.csv", "suomi24/Data/filtered/s24_2009.csv", "suomi24/Data/filtered/s24_2010.csv", "suomi24/Data/filtered/s24_2011.csv", "suomi24/Data/filtered/s24_2012.csv", "suomi24/Data/filtered/s24_2013.csv", "suomi24/Data/filtered/s24_2014.csv", "suomi24/Data/filtered/s24_2015.csv", "suomi24/Data/filtered/s24_2016.csv", "suomi24/Data/filtered/s24_2017.csv", "suomi24/Data/filtered/s24_2018.csv", "suomi24/Data/filtered/s24_2019.csv", "suomi24/Data/filtered/s24_2020.csv"]
+# output_files = ["suomi24/Data/further_filtered/s24_2001.csv", "suomi24/Data/further_filtered/s24_2002.csv", "suomi24/Data/further_filtered/s24_2003.csv", "suomi24/Data/further_filtered/s24_2004.csv", "suomi24/Data/further_filtered/s24_2005.csv", "suomi24/Data/further_filtered/s24_2007.csv", "suomi24/Data/further_filtered/s24_2008.csv", "suomi24/Data/further_filtered/s24_2009.csv", "suomi24/Data/further_filtered/s24_2010.csv", "suomi24/Data/further_filtered/s24_2011.csv", "suomi24/Data/further_filtered/s24_2012.csv", "suomi24/Data/further_filtered/s24_2013.csv", "suomi24/Data/further_filtered/s24_2014.csv", "suomi24/Data/further_filtered/s24_2015.csv", "suomi24/Data/further_filtered/s24_2016.csv", "suomi24/Data/further_filtered/s24_2017.csv", "suomi24/Data/further_filtered/s24_2018.csv", "suomi24/Data/further_filtered/s24_2019.csv", "suomi24/Data/further_filtered/s24_2020.csv"]
+
+filenames = ["suomi24/Data/filtered/s24_2005.csv", "suomi24/Data/filtered/s24_2007.csv", "suomi24/Data/filtered/s24_2008.csv", "suomi24/Data/filtered/s24_2009.csv", "suomi24/Data/filtered/s24_2010.csv", "suomi24/Data/filtered/s24_2011.csv", "suomi24/Data/filtered/s24_2012.csv", "suomi24/Data/filtered/s24_2013.csv", "suomi24/Data/filtered/s24_2014.csv", "suomi24/Data/filtered/s24_2015.csv", "suomi24/Data/filtered/s24_2016.csv", "suomi24/Data/filtered/s24_2017.csv", "suomi24/Data/filtered/s24_2018.csv", "suomi24/Data/filtered/s24_2019.csv", "suomi24/Data/filtered/s24_2020.csv"]
+output_files = ["suomi24/Data/further_filtered/s24_2005.csv", "suomi24/Data/further_filtered/s24_2007.csv", "suomi24/Data/further_filtered/s24_2008.csv", "suomi24/Data/further_filtered/s24_2009.csv", "suomi24/Data/further_filtered/s24_2010.csv", "suomi24/Data/further_filtered/s24_2011.csv", "suomi24/Data/further_filtered/s24_2012.csv", "suomi24/Data/further_filtered/s24_2013.csv", "suomi24/Data/further_filtered/s24_2014.csv", "suomi24/Data/further_filtered/s24_2015.csv", "suomi24/Data/further_filtered/s24_2016.csv", "suomi24/Data/further_filtered/s24_2017.csv", "suomi24/Data/further_filtered/s24_2018.csv", "suomi24/Data/further_filtered/s24_2019.csv", "suomi24/Data/further_filtered/s24_2020.csv"]
 
 # Define your stemmed keyword phrases and compile the regex patterns outside the loop
 phrases = [
-    ["cctv"],
-    ["public", "camera"],
-    ["julkinen", "kamera"],
-    ["julkinen", "camera"],
-    ["surveill"],
-    ["valvontaa"],
-    ["valvo"],
+    ["public", "camera", "privacy"],
+    ["public", "camera", "yksityisyyttä"],
+    ["public", "camera", "yksity"],
+    ["julkinen", "kamera", "yksityisyyttä"],
+    ["julkinen", "camera", "yksityisyyttä"],
+    ["julkinen", "kamera", "yksity"],
+    ["julkinen", "camera", "yksity"],
+    ["cctv", "surveill"],
+    ["cctv", "valvontaa"],
+    ["cctv", "valvo"],
+    ["camera", "surveill"],
+    ["kamera", "surveill"],
+    ["camera", "valvontaa"],
+    ["kamera", "valvontaa"],
+    ["camera", "valvo"],
+    ["kamera", "valvo"],
     ["security", "camera"],
     ["turvatoimet", "camera"],
     ["turvatoimet", "kamera"],
-    ["public", "safety"],
-    ["julkinen", "turvallisuus"],
-	["privacy"],
-    ["yksityisyyttä"],
-    ["yksity"],
-    ["security", "concern"],
-    ["turvatoimet", "koskea"],
-    ["turvatoimet", "huole"],
-    ["data", "protect"],
-    ["data", "suoj"],
-    ["tieto", "suoj"],
-    ["civil", "libert"],
-    ["sivi", "vapautta"],
-    ["sivi", "vapau"],
-    ["big", "brother"],
-    ["monitor"],
-    ["seurantaa"],
-    ["seurant"],
+    ["public", "safety", "concern"],
+    ["julkinen", "turvallisuus", "koskea"],
+    ["julkinen", "turvallisuus", "huole"],
+    ["public", "security", "concern"],
+    ["julkinen", "turvatoimet", "koskea"],
+    ["julkinen", "turvatoimet", "huole"],
+    ["monitor", "cctv"],
+    ["seurantaa", "cctv"],
+    ["seurant", "cctv"],
+    ["monitor", "camera"],
+    ["seurantaa", "camera"],
+    ["seurant", "camera"],
+    ["monitor", "kamera"],
+    ["seurantaa", "kamera"],
+    ["seurant", "kamera"],
     ["public", "footage"],
     ["julkinen", "kuvamateriaali"],
     ["camera", "footage"],
@@ -45,6 +57,45 @@ phrases = [
     ["katu", "camera"],
     ["katu", "kamera"]
 ]
+
+# phrases = [
+#     ["cctv"],
+#     ["public", "camera"],
+#     ["julkinen", "kamera"],
+#     ["julkinen", "camera"],
+#     ["surveill"],
+#     ["valvontaa"],
+#     ["valvo"],
+#     ["security", "camera"],
+#     ["turvatoimet", "camera"],
+#     ["turvatoimet", "kamera"],
+#     ["public", "safety"],
+#     ["julkinen", "turvallisuus"],
+# 	["privacy"],
+#     ["yksityisyyttä"],
+#     ["yksity"],
+#     ["security", "concern"],
+#     ["turvatoimet", "koskea"],
+#     ["turvatoimet", "huole"],
+#     ["data", "protect"],
+#     ["data", "suoj"],
+#     ["tieto", "suoj"],
+#     ["civil", "libert"],
+#     ["sivi", "vapautta"],
+#     ["sivi", "vapau"],
+#     ["big", "brother"],
+#     ["monitor"],
+#     ["seurantaa"],
+#     ["seurant"],
+#     ["public", "footage"],
+#     ["julkinen", "kuvamateriaali"],
+#     ["camera", "footage"],
+#     ["camera", "kuvamateriaali"],
+#     ["kamera", "kuvamateriaali"],
+#     ["street", "camera"],
+#     ["katu", "camera"],
+#     ["katu", "kamera"]
+# ]
 
 # Compile the regex patterns allowing for different suffixes based on the stem
 patterns = [

@@ -28,8 +28,8 @@ def write_chunk_to_csv(df_chunk, file_path, mode='a', header="False"):
 
 # Read the CSV file into a DataFrame
 
-input_file = 'C:/Users/user/Documents/suomi24/Data/filtered/s24_2005.csv'
-output_file = "C:/Users/user/Documents/suomi24/Data/translated/s24_2005.csv"
+input_file = 'C:/Users/fahad/OneDrive - Oulun yliopisto/Documents/suomi24/Data/further_filtered/s24_2020.csv'
+output_file = 'C:/Users/fahad/OneDrive - Oulun yliopisto/Documents/suomi24/Data/further_filtered_translated/s24_2020.csv'
 chunk_size = 5000
 df = pd.read_csv(input_file)
 print(input_file)
