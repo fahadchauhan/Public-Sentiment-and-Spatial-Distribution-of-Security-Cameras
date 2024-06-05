@@ -4,8 +4,15 @@ reddit/__pycache__/*
 suomi24/Data/*
 suomi24/bertopic_model
 suomi24/bertopic_model_best
+suomi24/bertopic_model_topic0
+suomi24/bertopic_model_best_topic0
+suomi24/kmeans_model_1000.pkl
+suomi24/tfidf_vectorizer_model_1000.pkl
 suomi24/suomi24_with_topics.csv
 suomi24/suomi24_with_loaded_topics.csv
 suomi24/suomi24_with_best_topics.csv
 suomi24/suomi24_with_best_topics_reduced_merged.csv
 suomi24/suomi24_empath_categories.csv
+suomi24/suomi24_kmeans_divided_topics.csv
+suomi24/suomi24_lda_final_topics.csv
+suomi24/suomi24_with_best_topics_topic0.csv
