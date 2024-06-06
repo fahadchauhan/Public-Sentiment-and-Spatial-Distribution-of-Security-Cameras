@@ -16,3 +16,4 @@ suomi24/suomi24_empath_categories.csv
 suomi24/suomi24_kmeans_divided_topics.csv
 suomi24/suomi24_lda_final_topics.csv
 suomi24/suomi24_with_best_topics_topic0.csv
+suomi24/embeddings.pkl
