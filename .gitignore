@@ -16,6 +16,10 @@ suomi24/suomi24_empath_categories.csv
 suomi24/suomi24_kmeans_divided_topics.csv
 suomi24/suomi24_lda_final_topics.csv
 suomi24/suomi24_with_best_topics_topic0.csv
+suomi24/suomi24_bertweet_processed.csv
+suomi24/suomi24_with_hypotheses.csv
 suomi24/hypothesis_embeddings.pkl
-suomi24/text_embeddings.pkl
-suomi24/similarity_scores.pkl
+suomi24/thread_text_embeddings.pkl
+suomi24/combined_embeddings.pkl
+suomi24/thread_text_similarity_scores.pkl
+suomi24/combined_similarity_scores.pkl
