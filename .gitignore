@@ -25,3 +25,5 @@ suomi24/thread_text_embeddings.pkl
 suomi24/combined_embeddings.pkl
 suomi24/thread_text_similarity_scores.pkl
 suomi24/combined_similarity_scores.pkl
+reddit/reddit.csv
+
