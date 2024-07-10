@@ -1,0 +1,46 @@
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from mlxtend.frequent_patterns import fpgrowth, association_rules
+
+# Load the dataset
+file_path = "C:/Users/fahad/OneDrive - Oulun yliopisto/Documents/reddit/Data/reddit_processed.csv"
+df = pd.read_csv(file_path, usecols=['thread_text_processed'])
+
+# Vectorize the text
+vectorizer = CountVectorizer(max_df=0.90, min_df=0.01, binary=True)
+X = vectorizer.fit_transform(df['thread_text_processed'])
+feature_names = vectorizer.get_feature_names_out()
+
+# Convert to DataFrame for FP-Growth
+df_binary = pd.DataFrame.sparse.from_spmatrix(X, columns=feature_names)
+
+# Apply FP-Growth
+frequent_itemsets = fpgrowth(df_binary, min_support=0.01, use_colnames=True)
+rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.1)
+
+# Define the hypotheses with synonyms included
+hypotheses = {
+    'H0': {'antecedent': [['public', 'camera'], ['public', 'cctv']], 'consequent': ['privacy']},
+    'H1': {'antecedent': [['surveillance', 'camera'], ['monitoring', 'cctv']], 'consequent': ['reduce', 'crime']},
+    'H2': {'antecedent': [['personal', 'experience'], ['individual', 'encounter']], 'consequent': ['public', 'monitoring']},
+    'H3': {'antecedent': [['trust', 'organizations'], ['confidence', 'agencies']], 'consequent': ['transparency', 'accountability']},
+    'H4': {'antecedent': [['attitudes', 'camera'], ['views', 'cctv']], 'consequent': ['various', 'settings']},
+    'H5': {'antecedent': [['technical', 'complaints'], ['mechanical', 'issues']], 'consequent': ['enhancements']},
+    'H6': {'antecedent': [['surveillance', 'camera'], ['security', 'cctv']], 'consequent': ['secure', 'watched']},
+    'H7': {'antecedent': [['density', 'camera'], ['concentration', 'cctv']], 'consequent': ['public', 'opinion']}
+}
+
+# Test the hypotheses with synonyms
+def test_hypothesis(rules, hypothesis):
+    supported = False
+    for index, rule in rules.iterrows():
+        for antecedent in hypothesis['antecedent']:
+            if set(antecedent).issubset(rule['antecedents']) and set(hypothesis['consequent']).issubset(rule['consequents']):
+                supported = True
+                print(f"Hypothesis supported: {antecedent} -> {hypothesis['consequent']}")
+    if not supported:
+        print(f"Hypothesis not supported: {hypothesis['antecedent']} -> {hypothesis['consequent']}")
+
+# Evaluate all hypotheses
+for name, hypothesis in hypotheses.items():
+    test_hypothesis(rules, hypothesis)
