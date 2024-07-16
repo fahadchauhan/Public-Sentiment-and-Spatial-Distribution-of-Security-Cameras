@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from mlxtend.frequent_patterns import fpgrowth, association_rules
 
 # Load the dataset
-file_path = "C:/Users/user/OneDrive - Oulun yliopisto/Documents/suomi24/Data/suomi24.csv"
+file_path = "C:/Users/fahad/OneDrive - Oulun yliopisto/Documents/reddit/Data/reddit_processed.csv"
 df = pd.read_csv(file_path, usecols=['thread_text_processed'])
 # print(df)
 print("Vectorize the text")
@@ -18,11 +18,11 @@ df_binary = pd.DataFrame.sparse.from_spmatrix(X, columns=feature_names)
 
 print("Apply FP-Growth")
 # Apply FP-Growth
-frequent_itemsets = fpgrowth(df_binary, min_support=0.01, use_colnames=True)
+frequent_itemsets = fpgrowth(df_binary, min_support=0.000001, use_colnames=True)
 
 print("association_rules")
-rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.1)
-
+rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.001)
+print(f'rules: {rules}')
 print("Define the hypotheses with synonyms included")
 # Define the hypotheses with synonyms included
 hypotheses = {
