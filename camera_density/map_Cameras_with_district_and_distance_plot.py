@@ -214,7 +214,7 @@ for _, row in camera_gdf.iterrows():
         popup=f"Camera at (lat:{row['latitude']}, lon:{row['longitude']})<br>Heading: {row['heading']}",
         icon=folium.Icon(color="red", icon="camera")
     ).add_to(map_small)
-map_small.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_sub_small_districts_with_cameras.html")
+map_small.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_sub_districts_with_cameras.html")
 
 print("Maps created and saved as 'helsinki_major_districts_with_cameras.html', 'helsinki_districts_with_cameras.html', and 'helsinki_sub_districts_with_cameras.html'")
 
