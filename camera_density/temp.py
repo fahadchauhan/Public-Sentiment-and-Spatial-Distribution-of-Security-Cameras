@@ -32,13 +32,23 @@ def calculate_camera_counts(district_gdf, id_column):
     district_gdf['camera_count'] = district_gdf['camera_count'].fillna(0).astype(int)
     return district_gdf
 
-# Paths to your data files
-camera_csv_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/signals_image_metadata_filtered.csv'
-major_districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/major_district_suurpiirit_WFS.gpkg'
-districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/district_peruspiiri_WFS.gpkg'
-sub_districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/sub_small_district_pienalueet_WFS.gpkg'
+# Merge population data with each geographic dataset
+def merge_population_data(gdf, gdf_column, population_data, pop_data_column):
+    # Merge based on district level (major, basic, or sub-district)
+    merged_gdf = gdf.merge(population_data, on=gdf_column, how='left')
+    return merged_gdf
 
-colors = {'Major District': 'blue', 'District': 'green', 'Small-District': 'orange'}
+# Paths to your data files
+camera_csv_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/signals_image_metadata_updated_with_cameras_filtered.csv'
+major_districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/major_district_suurpiirit_WFS.gpkg'
+basic_districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/basic_district_peruspiiri_WFS.gpkg'
+sub_districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/sub_small_district_pienalueet_WFS.gpkg'
+population_data_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/population_data.csv'
+
+# Load population data
+population_data = pd.read_csv(population_data_path, encoding='utf-8-sig')
+
+colors = {'Major District': 'blue', 'Basic District': 'green', 'Small-District': 'orange'}
 # Load camera data
 camera_data = pd.read_csv(camera_csv_path)
 camera_data = camera_data[camera_data['camera_present'] == True].reset_index(drop=True)
@@ -57,18 +67,42 @@ camera_gdf = gpd.GeoDataFrame(
 
 # Load district data and convert CRS if needed
 major_districts_gdf = gpd.read_file(major_districts_gpkg_path)
-districts_gdf = gpd.read_file(districts_gpkg_path)
+basic_districts_gdf = gpd.read_file(basic_districts_gpkg_path)
 sub_districts_gdf = gpd.read_file(sub_districts_gpkg_path)
 
 major_districts_gdf['major_district'] = major_districts_gdf['tunnus'].astype(str) + ": " + major_districts_gdf['nimi_fi']
+major_districts_gdf['Code_Name'] = major_districts_gdf['tunnus'].astype(str) + ": " + major_districts_gdf['nimi_fi'].str.lower()
 
-districts_gdf['district'] = districts_gdf['tunnus'].astype(str) + ": " + districts_gdf['nimi_fi']
+basic_districts_gdf['basic_district'] = basic_districts_gdf['tunnus'].astype(str) + ": " + basic_districts_gdf['nimi_fi']
+basic_districts_gdf['Code_Name'] = basic_districts_gdf['tunnus'].astype(str) + ": " + basic_districts_gdf['nimi_fi'].str.lower()
 
 sub_districts_gdf['major_district'] = sub_districts_gdf['suurpiiri_tunnus'].astype(str) + ": " + sub_districts_gdf['suurpiiri_nimi_fi']
-sub_districts_gdf['district'] = sub_districts_gdf['peruspiiri_tunnus'].astype(str) + ": " + sub_districts_gdf['peruspiiri_nimi_fi']
+sub_districts_gdf['basic_district'] = sub_districts_gdf['peruspiiri_tunnus'].astype(str) + ": " + sub_districts_gdf['peruspiiri_nimi_fi']
 sub_districts_gdf['sub_district'] = sub_districts_gdf['osaalue_tunnus'].astype(str) + ": " + sub_districts_gdf['osaalue_nimi_fi']
+sub_districts_gdf['Code_Name'] = sub_districts_gdf['osaalue_tunnus'].astype(str) + ": " + sub_districts_gdf['osaalue_nimi_fi'].str.lower()
 
-for gdf in [major_districts_gdf, districts_gdf, sub_districts_gdf]:
+population_data['Code_Name'] = population_data['Code_Name'].str.lower()
+
+# print(population_data.head(10))
+# print(major_districts_gdf)
+
+# Merge population data into each district level
+major_districts_gdf = merge_population_data(major_districts_gdf, 'Code_Name', population_data, 'Code_Name')
+basic_districts_gdf = merge_population_data(basic_districts_gdf, 'Code_Name', population_data, 'Code_Name')
+sub_districts_gdf = merge_population_data(sub_districts_gdf, 'Code_Name', population_data, 'Code_Name')
+
+# Calculate land area for each district (assuming CRS is set to a metric system)
+major_districts_gdf['area_km2'] = (major_districts_gdf.geometry.to_crs({'init': 'EPSG:3857'}).area / 10**6).round(2)  # Area in square kilometers
+major_districts_gdf['area_mi2'] = (major_districts_gdf['area_km2'] * 0.386102).round(2)  # Convert km² to mi²
+
+basic_districts_gdf['area_km2'] = (basic_districts_gdf.geometry.to_crs({'init': 'EPSG:3857'}).area / 10**6).round(2)  # Area in square kilometers
+basic_districts_gdf['area_mi2'] = (basic_districts_gdf['area_km2'] * 0.386102).round(2)  # Convert km² to mi²
+
+sub_districts_gdf['area_km2'] = (sub_districts_gdf.geometry.to_crs({'init': 'EPSG:3857'}).area / 10**6).round(2)  # Area in square kilometers
+sub_districts_gdf['area_mi2'] = (sub_districts_gdf['area_km2'] * 0.386102).round(2)  # Convert km² to mi²
+
+
+for gdf in [major_districts_gdf, basic_districts_gdf, sub_districts_gdf]:
     if gdf.crs != camera_gdf.crs:
         gdf.to_crs(camera_gdf.crs, inplace=True)
 
@@ -92,7 +126,10 @@ folium.GeoJson(
                         'weight': 1,
                         'fillOpacity': 0.3
                     },
-    tooltip=folium.GeoJsonTooltip(fields=['major_district', 'camera_count'], aliases=['Major-District', 'Number of Cameras'])
+    tooltip=folium.GeoJsonTooltip(
+        fields=['major_district', 'area_km2', 'area_mi2', '2021', 'camera_count'],
+        aliases=['Major-District', 'Land Area (km²)', 'Land Area (mi²)', 'Population (2021)', 'Number of Cameras']
+    )
 ).add_to(map_major)
 for _, row in camera_gdf.iterrows():
     folium.Marker(
@@ -103,10 +140,10 @@ for _, row in camera_gdf.iterrows():
 map_major.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_major_districts_with_cameras.html")
 
 # 2. Map with District Boundaries and Camera Counts at District Level
-districts_gdf = calculate_camera_counts(districts_gdf, 'id')
+basic_districts_gdf = calculate_camera_counts(basic_districts_gdf, 'id')
 map_sub = folium.Map(location=[camera_gdf['latitude'].mean(), camera_gdf['longitude'].mean()], zoom_start=12)
 
-districts_gdf = districts_gdf.copy().merge(
+basic_districts_gdf = basic_districts_gdf.copy().merge(
     sub_districts_gdf[['major_district', 'peruspiiri_tunnus']],
     left_on='tunnus', right_on='peruspiiri_tunnus', how='left',
     suffixes=('', '')  # Use suffix to distinguish columns if needed
@@ -114,22 +151,22 @@ districts_gdf = districts_gdf.copy().merge(
 
 # Add districts layer with green borders and interactive highlighting
 folium.GeoJson(
-    districts_gdf,
+    basic_districts_gdf,
     style_function=lambda x: {
         'fillColor': 'transparent',  # No fill inside
-        'color': colors['District'],  # Green border color
+        'color': colors['Basic District'],  # Green border color
         'weight': 2,
         'fillOpacity': 0  # Transparent fill
     },
     highlight_function=lambda x: {
-        'fillColor': colors['District'],  # Highlight fill on hover
-        'color': colors['District'],  # Border highlight color
+        'fillColor': colors['Basic District'],  # Highlight fill on hover
+        'color': colors['Basic District'],  # Border highlight color
         'weight': 2,
         'fillOpacity': 0.3  # Light opacity on hover
     },
     tooltip=folium.GeoJsonTooltip(
-        fields=['major_district', 'district', 'camera_count'], 
-        aliases=['Major District', 'District', 'Number of Cameras']
+        fields=['major_district', 'basic_district', 'area_km2', 'area_mi2', '2021', 'camera_count'],
+        aliases=['Major District', 'Basic District', 'Land Area (km²)', 'Land Area (mi²)', 'Population (2021)', 'Number of Cameras']
     )
 ).add_to(map_sub)
 
@@ -152,7 +189,7 @@ for _, row in camera_gdf.iterrows():
         popup=f"Camera at (lat:{row['latitude']}, lon:{row['longitude']})<br>Heading: {row['heading']}",
         icon=folium.Icon(color="red", icon="camera")
     ).add_to(map_sub)
-map_sub.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_districts_with_cameras.html")
+map_sub.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_basic_districts_with_cameras.html")
 
 # 3. Map with sub-District small district Boundaries and Camera Counts at sub-District small district Level
 sub_districts_gdf = calculate_camera_counts(sub_districts_gdf, 'osaalue_tunnus')
@@ -179,17 +216,17 @@ folium.GeoJson(
         'fillOpacity': 0.3
     },
     tooltip=folium.GeoJsonTooltip(
-        fields=['major_district', 'district', 'sub_district', 'camera_count'],
-        aliases=['Major-District', 'District', 'Sub-District', 'Number of Cameras']
+        fields=['major_district', 'basic_district', 'sub_district', 'area_km2', 'area_mi2', '2021', 'camera_count'],
+        aliases=['Major-District', 'Basic District', 'Sub-District', 'Land Area (km²)', 'Land Area (mi²)', 'Population (2021)', 'Number of Cameras']
     )
 ).add_to(map_small)
 
 # Add districts layer with green borders
 folium.GeoJson(
-    districts_gdf,
+    basic_districts_gdf,
     style_function=lambda x: {
         'fillColor': 'transparent',  # No fill inside
-        'color': colors['District'],  # Green border color
+        'color': colors['Basic District'],  # Green border color
         'weight': 2,
         'fillOpacity': 0  # Transparent fill
     },
@@ -214,9 +251,22 @@ for _, row in camera_gdf.iterrows():
         popup=f"Camera at (lat:{row['latitude']}, lon:{row['longitude']})<br>Heading: {row['heading']}",
         icon=folium.Icon(color="red", icon="camera")
     ).add_to(map_small)
-map_small.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_sub_small_districts_with_cameras.html")
+map_small.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_sub_districts_with_cameras.html")
 
 print("Maps created and saved as 'helsinki_major_districts_with_cameras.html', 'helsinki_districts_with_cameras.html', and 'helsinki_sub_districts_with_cameras.html'")
+
+# Generate district-wise summary table
+major_district_summary = major_districts_gdf[['major_district', 'area_km2', 'area_mi2', '2021', 'camera_count']]
+major_district_summary.columns = ['Major-District', 'Land Area (km²)', 'Land Area (mi²)', 'Population (2021)', 'Number of Cameras']
+print(major_district_summary.to_latex(index=False, float_format="%.2f"))
+
+basic_district_summary = basic_districts_gdf[['major_district', 'basic_district', 'area_km2', 'area_mi2', '2021', 'camera_count']]
+basic_district_summary.columns = ['Major District', 'Basic District', 'Land Area (km²)', 'Land Area (mi²)', 'Population (2021)', 'Number of Cameras']
+print(basic_district_summary.to_latex(index=False, float_format="%.2f"))
+
+sub_district_summary = sub_districts_gdf_dissolved[['major_district', 'basic_district', 'sub_district', 'area_km2', 'area_mi2', '2021', 'camera_count']]
+sub_district_summary.columns = ['Major-District', 'Basic District', 'Sub-District', 'Land Area (km²)', 'Land Area (mi²)', 'Population (2021)', 'Number of Cameras']
+print(sub_district_summary.to_latex(index=False, float_format="%.2f"))
 
 
 # Calculate Average Distance of Unique Camera Locations (unique full_id coordinates)
