@@ -39,11 +39,11 @@ def merge_population_data(gdf, gdf_column, population_data, pop_data_column):
     return merged_gdf
 
 # Paths to your data files
-camera_csv_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/signals_image_metadata_updated_with_cameras_filtered.csv'
+camera_csv_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/code/postprocessing/signals_image_metadata_updated_with_cameras_filtered.csv'
 major_districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/major_district_suurpiirit_WFS.gpkg'
 basic_districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/basic_district_peruspiiri_WFS.gpkg'
 sub_districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/sub_small_district_pienalueet_WFS.gpkg'
-population_data_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/population_data.csv'
+population_data_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/code/postprocessing/population_data.csv'
 
 # Load population data
 population_data = pd.read_csv(population_data_path, encoding='utf-8-sig')
@@ -137,7 +137,7 @@ for _, row in camera_gdf.iterrows():
         popup=f"Camera at (lat:{row['latitude']}, lon:{row['longitude']})<br>Heading: {row['heading']}",
         icon=folium.Icon(color="red", icon="camera")
     ).add_to(map_major)
-map_major.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_major_districts_with_cameras.html")
+map_major.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/code/postprocessing/helsinki_major_districts_with_cameras.html")
 
 # 2. Map with District Boundaries and Camera Counts at District Level
 basic_districts_gdf = calculate_camera_counts(basic_districts_gdf, 'id')
@@ -189,7 +189,7 @@ for _, row in camera_gdf.iterrows():
         popup=f"Camera at (lat:{row['latitude']}, lon:{row['longitude']})<br>Heading: {row['heading']}",
         icon=folium.Icon(color="red", icon="camera")
     ).add_to(map_sub)
-map_sub.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_basic_districts_with_cameras.html")
+map_sub.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/code/postprocessing/helsinki_basic_districts_with_cameras.html")
 
 # 3. Map with sub-District small district Boundaries and Camera Counts at sub-District small district Level
 sub_districts_gdf = calculate_camera_counts(sub_districts_gdf, 'osaalue_tunnus')
@@ -251,7 +251,7 @@ for _, row in camera_gdf.iterrows():
         popup=f"Camera at (lat:{row['latitude']}, lon:{row['longitude']})<br>Heading: {row['heading']}",
         icon=folium.Icon(color="red", icon="camera")
     ).add_to(map_small)
-map_small.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_all/helsinki_sub_districts_with_cameras.html")
+map_small.save("C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/code/postprocessing/helsinki_sub_districts_with_cameras.html")
 
 print("Maps created and saved as 'helsinki_major_districts_with_cameras.html', 'helsinki_districts_with_cameras.html', and 'helsinki_sub_districts_with_cameras.html'")
 

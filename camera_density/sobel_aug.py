@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 input_base_dir = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals/images'
 label_base_dir = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals/labels'
-output_base_dir = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_bg_train_sobel_aug'
+output_base_dir = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/signals_train_sobel_aug'
 
 # Ensure base output directory exists for images and labels
 os.makedirs(os.path.join(output_base_dir, 'images'), exist_ok=True)
