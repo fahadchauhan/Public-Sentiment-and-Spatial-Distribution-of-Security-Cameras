@@ -38,6 +38,15 @@ def merge_population_data(gdf, gdf_column, population_data, pop_data_column):
     merged_gdf = gdf.merge(population_data, on=gdf_column, how='left')
     return merged_gdf
 
+def remove_leading_zeros(data, column):
+    """
+    Remove leading zeros from the numeric part of the Code_Name column.
+    """
+    data[column] = data[column].astype(str)  # Ensure all values are strings
+    # Use regex to remove leading zeros from numeric parts
+    data[column] = data[column].str.replace(r'^0+', '', regex=True)
+    return data
+
 # Paths to your data files
 camera_csv_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/code/postprocessing/signals_image_metadata_updated_with_cameras_filtered.csv'
 major_districts_gpkg_path = 'C:/Users/fahad/OneDrive - Oulun yliopisto/OULU/Thesis/camera_density/Dataset/geopackage/major_district_suurpiirit_WFS.gpkg'
@@ -90,6 +99,12 @@ population_data['Code_Name'] = population_data['Code_Name'].str.lower()
 major_districts_gdf = merge_population_data(major_districts_gdf, 'Code_Name', population_data, 'Code_Name')
 basic_districts_gdf = merge_population_data(basic_districts_gdf, 'Code_Name', population_data, 'Code_Name')
 sub_districts_gdf = merge_population_data(sub_districts_gdf, 'Code_Name', population_data, 'Code_Name')
+
+# Remove leading zeros from 'Code_Name' in both datasets
+population_data = remove_leading_zeros(population_data, 'Code_Name')
+major_districts_gdf = remove_leading_zeros(major_districts_gdf, 'Code_Name')
+basic_districts_gdf = remove_leading_zeros(basic_districts_gdf, 'Code_Name')
+sub_districts_gdf = remove_leading_zeros(sub_districts_gdf, 'Code_Name')
 
 # Calculate land area for each district (assuming CRS is set to a metric system)
 major_districts_gdf['area_km2'] = (major_districts_gdf.geometry.to_crs({'init': 'EPSG:3857'}).area / 10**6).round(2)  # Area in square kilometers
