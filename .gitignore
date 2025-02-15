@@ -27,4 +27,5 @@ suomi24/thread_text_similarity_scores.pkl
 suomi24/combined_similarity_scores.pkl
 reddit/reddit.csv
 reddit/reddit_processed.csv
-
+old_README.md
+.idea
